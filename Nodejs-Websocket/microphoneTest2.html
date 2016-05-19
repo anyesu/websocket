@@ -1,0 +1,216 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta http-equiv="content-type" content="text/html;charset=utf-8">
+        <meta name="author" content="Tencent-TGideas">
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="description" content="">
+        <meta name="keywords" content="">
+        <title>浏览器捕捉麦克风功能测试2</title>
+    </head>
+    <body>
+        <center>
+            <h1>浏览器捕捉麦克风功能测试2</h1>
+            <hr/>
+            <div>
+                <button class="btn-start">开始录制 </button>
+                <button class="btn-end">结束录制 </button>
+            </div>
+            <p class="output">点击“开始录制”按钮开始录音</p>
+            <div class="my-audio"></div>
+        </center>
+        <script>
+            // lib
+            var $ = function(className){return document.querySelector(className)};
+
+            // variables
+            var leftchannel = [];
+            var rightchannel = [];
+            var recorder = null;
+            var recording = false;
+            var recordingLength = 0;
+            var volume = null;
+            var audioInput = null;
+            var sampleRate = null;
+            var audioContext = null;
+            var context = null;
+            var outputElement = document.querySelector('.output');
+            var myAudio = document.querySelector('.my-audio');
+            var outputString;
+
+            // feature detection 
+            if (!navigator.getUserMedia)
+                navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia ||
+                              navigator.mozGetUserMedia || navigator.msGetUserMedia;
+
+            if (navigator.getUserMedia){
+                navigator.getUserMedia({audio:true}, success, function(e) {
+                    // alert('捕获失败！');
+                });
+            } else alert('不支持getUserMedia');
+
+                
+                // if R is pressed, we start recording
+
+                $('.btn-start').addEventListener('click', function(e){
+                    recording = true;
+                    // reset the buffers for the new recording
+                    leftchannel.length = rightchannel.length = 0;
+                    recordingLength = 0;
+                    outputElement.innerHTML = '正在录制...';
+                });
+
+                $('.btn-end').addEventListener('click', function(e){
+                    // we stop recording
+                    recording = false;
+
+                    outputElement.innerHTML = '录制完成！';
+
+                    // we flat the left and right channels down
+                    var leftBuffer = mergeBuffers ( leftchannel, recordingLength );
+                    var rightBuffer = mergeBuffers ( rightchannel, recordingLength );
+                    // we interleave both channels together
+                    var interleaved = interleave ( leftBuffer, rightBuffer );
+
+                    // we create our wav file
+                    var buffer = new ArrayBuffer(44 + interleaved.length);
+
+
+                    var view = new DataView(buffer);
+                    sampleRate = 11025;
+                    // RIFF chunk descriptor
+                    writeUTFBytes(view, 0, 'RIFF');
+                    view.setUint32(4, 44 + interleaved.length , true);
+                    writeUTFBytes(view, 8, 'WAVE');
+                    // FMT sub-chunk
+                    writeUTFBytes(view, 12, 'fmt ');
+                    view.setUint32(16, 16, true);
+                    view.setUint16(20, 1, true);
+                    // stereo (2 channels)
+                    view.setUint16(22, 2, true);
+                    view.setUint32(24, sampleRate, true);
+                    view.setUint32(28, sampleRate * 2, true);
+                    view.setUint16(32, 2, true);
+                    view.setUint16(34, 8, true);
+                    // data sub-chunk
+                    writeUTFBytes(view, 36, 'data');
+                    view.setUint32(40, interleaved.length , true);
+
+                    // write the PCM samples
+                    var lng = interleaved.length;
+                    var index = 44;
+                    var volume = 1;
+                    for (var i = 0; i < lng; i++){
+                        var val = interleaved[i] * (0x7FFF * volume);
+                    val = parseInt(255 / (65535 / (val + 32768)));
+                    view.setInt8(index, val, true);
+                    index += 1;
+                    }
+
+                    var blob = new Blob ( [ view ], { type : 'audio/mpeg' } );
+
+                    // android chrome audio不支持blob
+                    var reader = new FileReader();
+                    reader.onload = function(event){
+                        var audio = window.document.createElement('audio');
+                        audio.src = event.target.result;
+                        audio.controls = true;
+                        audio.play();
+                        myAudio.appendChild(audio);
+                    };
+                    // 转换base64
+                    reader.readAsDataURL(blob);
+
+                });
+
+
+                function interleave(leftChannel, rightChannel){
+                    var length = leftChannel.length *2;
+                    var result = new Float32Array(length);
+
+                    var inputIndex = 0;
+
+                    for (var index = 0; index < length; ){
+                        result[index++] = leftChannel[inputIndex];
+                        result[index++] = rightChannel[inputIndex];
+                        inputIndex++;
+                    }
+
+                    compression = 44100 / 11025, //计算压缩率
+                    length = length/compression,
+                    result2 = new Float32Array(length);
+                    index = 0;
+                    while (index < length) {
+                        result2[index] = result[index++ * compression];
+                    }
+                    return result2;
+                }
+
+                function mergeBuffers(channelBuffer, recordingLength){
+                    var result = new Float32Array(recordingLength);
+                    var offset = 0;
+                    var lng = channelBuffer.length;
+                    for (var i = 0; i < lng; i++){
+                        var buffer = channelBuffer[i];
+                        result.set(buffer, offset);
+                        offset += buffer.length;
+                    }
+                    return result;
+                }
+
+                function writeUTFBytes(view, offset, string){ 
+                        var lng = string.length;
+                        for (var i = 0; i < lng; i++){
+                        view.setUint8(offset + i, string.charCodeAt(i));
+                    }
+                }
+
+                function success(e){
+                // creates the audio context
+                audioContext = window.AudioContext || window.webkitAudioContext;
+                context = new audioContext();
+
+                // we query the context sample rate (varies depending on platforms)
+                sampleRate = context.sampleRate;
+
+                console.log('succcess');
+
+                // creates a gain node
+                volume = context.createGain();
+
+                // creates an audio node from the microphone incoming stream
+                audioInput = context.createMediaStreamSource(e);
+
+                // connect the stream to the gain node
+                audioInput.connect(volume);
+
+                /* From the spec: This value controls how frequently the audioprocess event is 
+                dispatched and how many sample-frames need to be processed each call. 
+                Lower values for buffer size will result in a lower (better) latency. 
+                Higher values will be necessary to avoid audio breakup and glitches */
+                var bufferSize = 2048;
+                recorder = context.createScriptProcessor(bufferSize, 2, 2);
+
+                recorder.onaudioprocess = function(e){
+                    if (!recording) return;
+                    var left = e.inputBuffer.getChannelData (0);
+                    var right = e.inputBuffer.getChannelData (1);
+                    // we clone the samples
+                    leftchannel.push (new Float32Array (left));
+                    rightchannel.push (new Float32Array (right));
+                    recordingLength += bufferSize;
+                    console.log('recording');
+                    }
+
+                    // we connect the recorder
+                    volume.connect (recorder);
+                    recorder.connect (context.destination); 
+                }
+        </script>   
+    </body>
+</html>
+
+<!--[if !IE]>|xGv00|3b026421f8e2440e34087c5f1a1c846d<![endif]-->

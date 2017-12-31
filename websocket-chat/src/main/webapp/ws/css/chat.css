@@ -1,0 +1,130 @@
+/*chrome浏览器下滚动条样式*/
+::-webkit-scrollbar-track-piece{
+	background-color:#fff;
+	-webkit-border-radius:0;
+}
+::-webkit-scrollbar{
+	width:10px;
+	height:10px
+}
+::-webkit-scrollbar-thumb{
+	background-color:rgba(0,0,0,0.2);
+	border-radius:5px;
+}
+::-webkit-scrollbar-thumb:hover{
+	background-color:rgba(0,0,0,0.3);
+}
+::-webkit-scrollbar-arrow {
+	color:#F00;
+	backgound:#0F0;
+}
+/*IE下滚动条样式*/
+* {
+	scrollbar-face-color: gray;
+	scrollbar-arrow-color: #F00;
+	scrollbar-track-color: transparent;
+}
+
+
+*{margin:0; padding:0; cursor:default;}
+html, body{width:100%; height:100%; font-family:微软雅黑; position:absolute; font-size:12px; overflow-x:auto; overflow-y:auto; text-align:center;}
+div{width:100%;overflow:hidden;}
+h2{color: red;}
+.mwd{margin: 0 auto;text-align: left;position: relative;top: 0%;left: 0%;width:720px;min-width:720px;height:580px;min-height:580px;overflow:hidden;box-shadow: 5px 5px 5px rgba(0,0,0,0.4);-webkit-box-shadow: 5px 5px 5px rgba(0,0,0,0.4);border: 1px solid #d4dce0;border-radius: 7px;background-color: #eaf1f6;}
+.mwd_full{width:100%;height:100%;}
+.pageTop{width: 100%;height: 85px;float: left;border-bottom: 1px solid #d4dce0;position: relative;left: 0;top: 0;}
+.pageTop .title{position: absolute;top: 5px;left: 10px;width: 500px;height: 45px;}
+.pageTop .title .host{color:red;}
+.pageTop .toolbar{position: absolute;right: 0px;top: -2px;overflow: hidden;width: auto;height: auto;}
+.pageTop .toolbar a{cursor: pointer;float: left;width: 19px;height: 21px;margin-left: 5px;line-height: 10;overflow: hidden;background: url(../pic/websocket/sprite_main.png) no-repeat;display: block;}
+.pageTop .toolbar .close{background-position: -64px -59px;}
+.pageTop .toolbar .close:hover{background-position: -64px -30px;}
+.pageTop .toolbar .close:active{background-position: -64px -2px;}
+.pageTop .toolbar .min{background-position: -7px -59px;}
+.pageTop .toolbar .min:hover{background-position: -7px -30px;}
+.pageTop .toolbar .min:active{background-position: -7px -2px;}
+.pageTop .toolbar .max{background-position: -36px -59px;}
+.pageTop .toolbar .max:hover{background-position: -36px -30px;}
+.pageTop .toolbar .max:active{background-position: -36px -2px;}
+.pageTop .func{cursor: Default;position: absolute;bottom: 3px;left: 7px;height: 23px;max-width: 80%;text-align: left;overflow: visible;}
+.pageTop .func a{cursor: pointer;padding: 10px 5px 9px 34px;font-size: 14px;}
+.pageTop .func a:hover {cursor: pointer;border: 1px solid #666;border-bottom: 0;border-radius: 3px;padding: 10px 4px 9px 33px;background-position: 4px 9px;}
+.pageTop .func a.click {cursor: Default;border: 1px solid #666;border-bottom: 0;border-radius: 3px;padding: 10px 4px 9px 33px;background-position: 4px 9px;}
+.pageTop .func a.check {cursor: Default;border: 1px solid #666;border-bottom: 0;border-radius: 3px;padding: 10px 4px 9px 33px;background-position: 4px 9px;}
+.pageTop .func a.chat{background: url(../pic/websocket/mod_chat.png) no-repeat 5px 9px;}
+.pageTop .func a.voice{background: url(../pic/websocket/mod_voice.png) no-repeat 5px;}
+.pageTop .func a.video{background: url(../pic/websocket/mod_video.png) no-repeat 5px;}
+.pageTop .func a.file{background: url(../pic/websocket/mod_file.png) no-repeat 5px;}
+.mwd .mode-text .pageLeft{width: 519px;height: 100%;}
+.mwd .mode-text .pageLeft .edit{width: 100%;height: 135px;border-top: 1px solid #d4dce0;}
+.mwd .mode-text .pageLeft .edit .buttons{height:30px;}
+.mwd .mode-text .pageLeft .edit .buttons .button{text-align: center;line-height: 20px;font-weight: bold;width: 40px;height: 20px;margin: 2px 3px;padding: 2px 10px;border-radius: 3px;background-color: #388bff;border-color: #388bff;float: right;}
+.mwd .mode-text .pageLeft .edit .buttons .button:hover{cursor:pointer;box-shadow: 1px 1px 1px rgba(0,0,0,0.4);}
+.mwd .mode-text .pageLeft .edit .buttons .info{float: left;font-size: 8px;padding: 5px 0;margin: 0 0 0 10px;height: 20px;max-width: 260px;vertical-align: middle;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+.mwd .mode-text .pageLeft .edit .editTool{background: url(../pic/websocket/Toolbar.png) no-repeat 5px;width: 100%;height: 25px;}
+.mwd .mode-text .pageLeft .edit .mainedit{box-sizing: border-box;padding: 5px;font-size: 16px;font-weight: 800;display:block;resize: none;width: 100%;height: 80px;text-align: left;border-color: rgb(228, 186, 20);outline: 0;}
+.mwd .mode-text .pageLeft .content{padding: 10px 0;width: 100%;height: 339px;overflow-x: hidden;overflow-y: auto;}
+.mwd .mode-text .pageLeft .content .contentadd{overflow:visible;width:100%;}
+.mwd .mode-text .pageLeft .content .row{overflow: hidden; display: block;position: relative;}
+.mwd .mode-text .pageLeft .content .row i{transform:rotate(-45deg);-ms-transform:rotate(-45deg); /* Internet Explorer */-moz-transform:rotate(-45deg); /* Firefox */-webkit-transform:rotate(-45deg); /* Safari 和 Chrome */-o-transform:rotate(-45deg); /* Opera */border-left: 5px solid transparent;border-right: 5px solid transparent;border-bottom: 5px solid rgb(228, 186, 20);display: block;width: 1px;height: 1px;overflow: hidden;position: absolute;top: 8px;right: 44px;}
+.mwd .mode-text .pageLeft .content .row i.src{transform:rotate(45deg);-ms-transform:rotate(45deg); /* Internet Explorer */-moz-transform:rotate(45deg); /* Firefox */-webkit-transform:rotate(45deg); /* Safari 和 Chrome */-o-transform:rotate(45deg); /* Opera */left: 44px;}
+.mwd .mode-text .pageLeft .content .row .headpic{background: url(../pic/websocket/headpic.png);background-size: 100%;position: absolute;background-color: #fff;height: 30px;width: 30px;border-radius: 4px;right: 10px;}
+.mwd .mode-text .pageLeft .content .row span.headpic.src{left: 10px;}
+.mwd .mode-text .pageLeft .content dl{background-color: rgb(244,230,219);margin:5px 20px;border:3px solid rgb(228, 186, 20);border-radius: 7px;padding: 10px;max-width: 66%;}
+.mwd .mode-text .pageLeft .content div.src{font-size: 16px;width: auto;background-color: rgb(244,230,219);margin:5px 50px;border:3px solid rgb(228, 186, 20);border-radius: 7px;padding: 10px;max-width: 66%;float: left;}
+.mwd .mode-text .pageLeft .content div.dest{font-size: 16px;width: auto;background-color: rgb(244,230,219);margin:5px 50px;border:3px solid rgb(228, 186, 20);border-radius: 7px;padding: 10px;max-width: 66%;float: right;}
+.mwd .mode-text .pageLeft .content dl .blue{color: green;}
+.mwd .mode-text .pageLeft .content div .time{font-size: 8px;padding: 0;margin: 0;width: 90px;}
+
+.mwd .mode-text .pageRight{background-color: #eaf1f6;overflow-x: hidden;overflow-y: auto;padding:20px;width: 160px;border-left: 1px solid #d4dce0;height: 100%;right: 0;top: 86px;position: absolute;}
+.mwd .mode-text .pageRight .row{margin: 5px 0;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+.mwd .mode-text .pageRight .row .user{margin-left: 5px;line-height: 40px;width:160px;font-size: 20px;}
+.mwd .mode-text .pageRight .row .headpic{width: 40px;height: 40px;float: left;background-color: #fff;}
+
+
+.mwd .mode-video .pageLeft{width: 420px;height: 100%;}
+.mwd .mode-video .pageLeft .videocontent{padding: 10px 0;width: 100%;height: 339px;overflow-x: hidden;overflow-y: auto;}
+.mwd .mode-video .pageLeft .videocontent canvas{margin: 10px;border-radius: 5px;border: 3px solid #388bff;}
+.mwd .mode-video .pageLeft .row{margin: 5px 0;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+.mwd .mode-video .pageLeft .row .user{margin-left: 5px;line-height: 40px;width:160px;font-size: 20px;}
+.mwd .mode-video .pageLeft .row .headpic{width: 40px;height: 40px;float: left;background-color: #fff;}
+.mwd .mode-video .pageLeft .myView{text-align: center;}
+.mwd .mode-video .pageLeft .myView video#myVideo{margin: 10px;width: auto;border-radius: 5px;border: 3px solid rgb(228, 186, 20);}
+
+.mwd .mode-video .pageRight{background-color: #eaf1f6;overflow-x: hidden;overflow-y: auto;width: 300px;border-left: 1px solid #d4dce0;height: 100%;right: 0;top: 86px;position: absolute;}
+.mwd .mode-video .pageRight .edit{width: 100%;height: 135px;border-top: 1px solid #d4dce0;}
+.mwd .mode-video .pageRight .edit .buttons{height:30px;}
+.mwd .mode-video .pageRight .edit .buttons .button{text-align: center;line-height: 20px;font-weight: bold;width: 40px;height: 20px;margin: 2px 3px;padding: 2px 10px;border-radius: 3px;background-color: #388bff;border-color: #388bff;float: right;}
+.mwd .mode-video .pageRight .edit .buttons .button:hover{cursor:pointer;box-shadow: 1px 1px 1px rgba(0,0,0,0.4);}
+.mwd .mode-video .pageRight .edit .buttons .info{float: left;font-size: 8px;padding: 5px 0;margin: 0 0 0 10px;height: 20px;max-width: 150px;vertical-align: middle;overflow: hidden;text-overflow: ellipsis;white-space: nowrap;}
+.mwd .mode-video .pageRight .edit .editTool{background: url(../pic/websocket/Toolbar.png) no-repeat 5px;width: 100%;height: 25px;}
+.mwd .mode-video .pageRight .edit .mainedit{box-sizing: border-box;padding: 5px;font-size: 16px;font-weight: 800;display:block;resize: none;width: 100%;height: 80px;text-align: left;border-color: rgb(228, 186, 20);outline: 0;}
+.mwd .mode-video .pageRight .content{padding: 10px 0;width: 100%;height: 339px;overflow-x: hidden;overflow-y: auto;}
+.mwd .mode-video .pageRight .content .contentadd{overflow:visible;width:100%;}
+.mwd .mode-video .pageRight .content .row{overflow: hidden; display: block;position: relative;}
+.mwd .mode-video .pageRight .content .row i{transform:rotate(-45deg);-ms-transform:rotate(-45deg); /* Internet Explorer */-moz-transform:rotate(-45deg); /* Firefox */-webkit-transform:rotate(-45deg); /* Safari 和 Chrome */-o-transform:rotate(-45deg); /* Opera */border-left: 5px solid transparent;border-right: 5px solid transparent;border-bottom: 5px solid rgb(228, 186, 20);display: block;width: 1px;height: 1px;overflow: hidden;position: absolute;top: 8px;right: 44px;}
+.mwd .mode-video .pageRight .content .row i.src{transform:rotate(45deg);-ms-transform:rotate(45deg); /* Internet Explorer */-moz-transform:rotate(45deg); /* Firefox */-webkit-transform:rotate(45deg); /* Safari 和 Chrome */-o-transform:rotate(45deg); /* Opera */left: 44px;}
+.mwd .mode-video .pageRight .content .row .headpic{background: url(../pic/websocket/headpic.png);background-size: 100%;position: absolute;background-color: #fff;height: 30px;width: 30px;border-radius: 4px;right: 10px;}
+.mwd .mode-video .pageRight .content .row span.headpic.src{left: 10px;}
+.mwd .mode-video .pageRight .content dl{background-color: rgb(244,230,219);margin:5px 20px;border:3px solid rgb(228, 186, 20);border-radius: 7px;padding: 10px;max-width: 66%;}
+.mwd .mode-video .pageRight .content div.src{font-size: 16px;width: auto;background-color: rgb(244,230,219);margin:5px 50px;border:3px solid rgb(228, 186, 20);border-radius: 7px;padding: 10px;max-width: 66%;float: left;}
+.mwd .mode-video .pageRight .content div.dest{font-size: 16px;width: auto;background-color: rgb(244,230,219);margin:5px 50px;border:3px solid rgb(228, 186, 20);border-radius: 7px;padding: 10px;max-width: 66%;float: right;}
+.mwd .mode-video .pageRight .content dl .blue{color: green;}
+.mwd .mode-video .pageRight .content div .time{font-size: 8px;padding: 0;margin: 0;width: 90px;}
+
+.audiocontent{display: none;}
+.error{color: #ee504c;}
+
+
+#min-max{position: absolute;right: 0px;bottom: 2px;left: 2px;overflow: hidden;height: auto;background-color: #660;width: 80px;}
+#min-max a{cursor: pointer;float: left;width: 19px;height: 21px;margin-left: 5px;line-height: 10;overflow: hidden;background: url(../pic/websocket/sprite_main.png) no-repeat;display: block;}
+#min-max .close{background-position: -64px -59px;}
+#min-max .close:hover{background-position: -64px -30px;}
+#min-max .close:active{background-position: -64px -2px;}
+#min-max .back{background-position: -7px -59px;}
+#min-max .back:hover{background-position: -7px -30px;}
+#min-max .back:active{background-position: -7px -2px;}
+#min-max .max{background-position: -36px -59px;}
+#min-max .max:hover{background-position: -36px -30px;}
+#min-max .max:active{background-position: -36px -2px;}
+.red{color: #ee504c}

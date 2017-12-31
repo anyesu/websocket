@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <title>浏览器打开摄像头功能测试</title>
+        <meta http-equiv="content-type" content="text/html;charset=utf-8">
+        <meta name="author" content="Tencent-TGideas">
+        <meta name="format-detection" content="telephone=no" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+        <meta name="description" content="">
+        <meta name="keywords" content="">
+        <script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+        <script type="text/javascript" src="js/media.js"></script>
+        <script type="text/javascript">
+            var camera, myVideo,video;
+            function play() {
+                camera.start(function() {
+                    myVideo.init(camera.source());
+                    myVideo.play();
+                });
+            }
+            function pause() {
+               myVideo.pause();
+               camera.stop(myVideo.src);
+            }
+            function capture() {
+                $("img")[0].src = myVideo.CurrentFrame(100,100).src;
+            }
+            $(document).ready(function () {
+                camera = new Camera();
+                myVideo = new Video("#myVideo");
+                video = myVideo.dom;
+    			var canvas = $("#canvas");
+                var _canvas = canvas.get(0);
+                var context = _canvas.getContext("2d");
+                myVideo.obj.bind("play", function () {
+                    drawCanvas();
+                });
+                
+                function drawBlock(context, x, y, width, height, color) {
+                    var imageData = context.getImageData(0,0,width, height);
+                    context.putImageData(imageData, x, y);
+                }
+
+                function drawCanvas() {
+                    if (video.paused || video.ended) {
+                        return;
+                    }
+                    context.drawImage(video, 0, 0, 640, 360);
+                    //drawBlock(context,320,180, 640, 360);
+                    setTimeout(am, 30);
+                }
+                function am() {
+                    requestAnimationFrame(drawCanvas)
+                }
+            });
+        </script>
+    </head>
+    <body>
+    <center>
+        <h3>一个WebRTC插件</h3>
+        <!-- Begin Fresh Tilled Soil Video Chat Embed Code -->
+        <div id="freshtilledsoil_embed_widget" class="video-chat-widget"></div>
+        <script id="fts" src="http://freshtilledsoil.com/embed/webrtc-v5.js?r=FTS0316-CZ6NqG97"></script>
+        <!-- End Fresh Tilled Soil Video Chat Embed Code -->
+        <hr />
+        <video  width="640" height="360" id="myVideo" style="background: #000;" controls="controls">
+            不支持video标签
+        </video>
+        <hr />
+        <canvas width="640" height="360" id="canvas" style="background: #000;">
+            不支持canvas标签
+        </canvas>
+        <img/>
+        <hr />
+        <button onclick="play()" >play</button>
+        <button onclick="pause()">pause</button>
+        <button onclick="capture()">capture</button>
+    </center>
+    </body>
+</html>

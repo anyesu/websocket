@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<head>
+	<meta http-equiv="content-type" content="text/html;charset=utf-8">
+	<link href="css/chat.css" rel="stylesheet" type="text/css">
+	<script type="text/javascript" src="js/jquery-1.9.1.js"></script>
+	<script>
+		//解决IE8不支持trim()
+		String.prototype.trim = function (){  
+		    return this.replace(/(^\s*)|(\s*$)/g, "");  
+		}
+	</script>
+	<script type="text/javascript" src="js/jquery.nicescroll.min.js"></script>
+	<script type="text/javascript" src="js/media.js"></script>
+	<script type="text/javascript" src="js/WSClient.js"></script>
+	<script type="text/javascript" src="js/chat.js"></script>
+	<script type="text/javascript" src="js/app.js"></script>
+</head>
+<body>
+	<h2><a id="user">asd</a>欢迎来到WebSocket聊天室</h2>
+	<div class="mwd">
+		<div class="pageTop">
+			<div class="title"></div>
+			<div class="toolbar">
+				<a class="min" title="最小化"></a>
+				<a class="max" title="最大化"></a>
+				<a class="close" title="关闭"></a>
+			</div>
+			<div class="func">
+				<a class="chat click">聊天</a>
+				<a class="video">视频</a>
+				<a class="voice">语音</a>
+				<a class="file">文件</a>
+			</div>
+		</div>
+		<div class="mode-text">
+			<div class="pageLeft">
+				<div class="content" id="console" MyScroll></div>
+				<div class="edit">
+					<div class="editTool" title="编辑工具栏敬请期待！"></div>
+					<textarea class="mainedit" MyScroll></textarea>
+					<div class="buttons">
+						<span id="submit" class="button" title="按Enter键发送消息，按Ctrl+Enter键换行">发送</span>
+						<span class="button close">关闭</span>
+						<span class="info"></span>
+					</div>
+				</div>
+			</div>
+			<div class="pageRight"></div>
+		</div>
+		<div class="mode-video" style="display: none;">
+			<div class="pageLeft">
+				<div class="videocontent" id="videocontent" MyScroll></div>
+				<div class="myView">
+					<video  width="160" height="90" id="myVideo" poster="/ws/pic/websocket/videopost.png">
+						您的浏览器不支持 video 标签。
+					</video>
+				</div>
+			</div>
+			<div class="pageRight">
+				<div class="content" id="console" MyScroll></div>
+				<div class="edit">
+					<div class="editTool" title="编辑工具栏敬请期待！"></div>
+					<textarea class="mainedit" MyScroll></textarea>
+					<div class="buttons">
+						<span id="submit" class="button" title="按Enter键发送消息，按Ctrl+Enter键换行">发送</span>
+						<span class="button close">关闭</span>
+						<span class="info"></span>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+	<div class="audiocontent" id="audiocontent">
+		<audio id="mySound">
+			您的浏览器不支持 audio 标签。
+		</audio>
+	</div>
+	<div id="min-max" style="display: none;">
+		<a class="back" title="最小化"></a>
+		<a class="max" title="最大化"></a>
+		<a class="close" title="关闭"></a>
+	</div>
+	<input type="hidden" id="username" value="">
+</body>

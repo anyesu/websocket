@@ -8,5 +8,20 @@
 ## 文档
 参考简书：[https://www.jianshu.com/nb/4071127](https://www.jianshu.com/nb/4071127)
 
+## Docker支持
+已添加docker-compose.yml和Dockerfile，可以很方便的在docker下运行demo。
+
+1. 获取项目
+```bash
+git clone git://github.com/anyesu/websocket
+```
+
+2. 使用 `docker-compose` 启动容器
+```bash
+cd websocket/websocket-samples && docker-compose up
+```
+
+3. 访问 `yourip:8080` 或者 `yourip:3000`
+
 ## 维护说明
 本目录下demo后续不再维护，仅作为博客配套的例子。tomcat版已重构为maven项目websocket-chat，以后针对这个项目进行维护。

@@ -6,18 +6,18 @@
 
 	app.use(express.static(__dirname));
 
-	http.listen(8080, function(){
-		console.log('httpServer: listening on "http://localhost:8080"');
+	http.listen(3000, function(){
+		console.log('httpServer: listening on "http://localhost:3000"');
 	});
 
 	// websocket服务设置
 	var WebSocketServer = require('ws').Server,
 		wss = new WebSocketServer({
-			port: 8082,
+			port: 3002,
 			// host: "localhost",
 			path: "/websocket/chat"
 		}, function() {
-			console.log('websocketServer: listening on "ws://localhost:8082/chat"');
+			console.log('websocketServer: listening on "ws://localhost:3002/chat"');
 		}),
 		connectionList = new ArrayList(),
 		roomInfo = {};

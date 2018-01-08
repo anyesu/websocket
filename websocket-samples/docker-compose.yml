@@ -1,0 +1,28 @@
+# tomcat版
+demo-websocket-tomcat:
+  # 指定用于构建镜像的Dockerfile路径, 值为字符串
+  build: 'Tomcat-Websocket'
+  # 设置容器用户名(镜像中已创建)，默认root
+  user: user_docker
+  # 设置容器主机名
+  hostname: docker-anyesu
+  # 容器内root账户是否拥有宿主机root账户的所有权限
+  privileged: false
+  # 当容器退出时docker自动重启它
+  restart: always
+  # 与宿主机之间的端口映射
+  ports:
+  - 8080:8080
+  # 设置容器环境变量
+  environment:
+    JAVA_OPTS: -Djava.security.egd=file:/dev/./urandom
+
+# nodejs版
+demo-websocket-nodejs:
+  # 指定用于构建镜像的Dockerfile路径, 值为字符串
+  build: 'Nodejs-Websocket'
+  privileged: false
+  restart: always
+  ports:
+  - 3000:3000
+  - 3002:3002

@@ -3,7 +3,7 @@ var MODE_TEXT = 0,
 	MODE_AUDIO = 2,
 	NO_SOURCE = new Image(),
 	textClient = new WSClient({
-		host: "ws://" + window.location.hostname + ":8082/websocket/chat",
+		host: "ws://" + window.location.hostname + ":3002/websocket/chat",
 		type: MODE_TEXT,
 		onopen: function() {
 			$(".mainedit").ctrlEnter("#submit", function(event) {

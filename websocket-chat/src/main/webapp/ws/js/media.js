@@ -147,7 +147,6 @@
 			var volume = this.context.createGain();
 			this.audioInput.connect(volume);
 			volume.connect(this.recorder);
-			this.audioInput.connect(this.recorder);
 			this.recorder.connect(this.context.destination);
 		}
 

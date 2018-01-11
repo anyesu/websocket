@@ -384,7 +384,9 @@
 		this.dom = this.obj.get(0);
 
 		this.init = function(src) {
-			this.dom.src = this.src = src;
+			if (src) {
+				this.dom.src = this.src = src;
+			}
 			return this;
 		}
 

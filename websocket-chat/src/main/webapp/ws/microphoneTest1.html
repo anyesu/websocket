@@ -1,36 +1,110 @@
 <!DOCTYPE HTML>
 <html>
-    <head>
-        <title>浏览器捕捉麦克风功能测试1</title>
-        <meta http-equiv="content-type" content="text/html;charset=utf-8">
-        <script type="text/javascript" src="js/jquery-1.9.1.js"></script>
-        <script type="text/javascript" src="js/media.js"></script>
-        <script type="text/javascript" >
-            var microPhone, myAudio;
-            function play() {
-                microPhone.start(function() {
-                    myAudio.init(microPhone.source());
-                });
-            }
-            function pause() {
-               myAudio.pause();
-            }
-            $(document).ready(function () {
-                myAudio = new audio("audio");
-                myAudio.source = microPhone = new MicroPhone();
-                myAudio.dom.autoplay = true;
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="description" content="浏览器捕捉麦克风功能测试1">
+    <title>浏览器捕捉麦克风功能测试1</title>
+    <style>
+        table {
+            margin: 20px auto;
+            border-spacing: 0;
+            border-collapse: collapse;
+        }
+
+        th, td {
+            padding: 6px 13px;
+            border: 1px solid #dfe2e5;
+        }
+    </style>
+</head>
+<body>
+    <div style="text-align: center;">
+        <h1>浏览器捕捉麦克风功能测试1</h1>
+        <hr/>
+        <table>
+            <tbody>
+            <tr>
+                <th>播放麦克风采集的原始音频流</th>
+                <td>
+                    <button onclick="play()">播放</button>
+                    <button onclick="pause()">暂停</button>
+                </td>
+            </tr>
+            <tr>
+                <th>录音+播放的形式来模拟连续的声音</th>
+                <td>
+                    <button onclick="play2()">播放</button>
+                    <button onclick="pause2()">暂停</button>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+<script type="text/javascript" src="js/media.js"></script>
+<script type="text/javascript">
+    var microPhone = new MicroPhone();
+    var audioContext = new AudioContext();
+
+    /**
+     * 播放麦克风采集的原始音频流
+     */
+    function play() {
+        microPhone.start();
+    }
+
+    function pause() {
+        microPhone.stop();
+    }
+
+    /**
+     * 录音+播放的形式来模拟连续的声音
+     */
+    function play2() {
+        if (!microPhone.isRecording) {
+            microPhone.startRecord({}, function(samples) {
+                playData1(samples);
+                // 方式二
+                // playData2(samples);
             });
-        </script>
-    </head>
-    <body>
-        <center>
-            <h1>浏览器捕捉麦克风功能测试1</h1>
-            <hr />
-            <audio>
-            您的浏览器不支持 audio 标签。
-            </audio>
-            <button onclick="play()" >play</button>
-            <button onclick="pause()">pause</button>
-        </center>
-    </body>
+        }
+    }
+
+    /**
+     * 播放原始音频数据
+     * @param inputBuffer
+     */
+    function playData1(inputBuffer) {
+        audioContext.playBuffer(inputBuffer);
+    }
+
+    /**
+     * 使用AudioContext提供的解码接口播放编码后的数据
+     * 此处只做调用示范，不推荐使用
+     * @param inputBuffer
+     */
+    function playData2(inputBuffer) {
+        var channelCount = inputBuffer.numberOfChannels,
+            length = inputBuffer.length,
+            samples = new Float32Array(channelCount * length);
+        for (var i = 0; i < length; i++) {
+            for (var j = 0; j < channelCount; j++) {
+                samples[i * channelCount + j] = inputBuffer.getChannelData(j)[i];
+            }
+        }
+        // 先编码成wav
+        var wav = encodeWAV(samples, microPhone.recorderConfig);
+        // 再解码
+        audioContext.decodeAudioData(wav, function(buffer) {
+            audioContext.playBuffer(buffer);
+        });
+    }
+
+    function pause2() {
+        if (microPhone.isRecording) {
+            microPhone.stopRecord();
+        }
+    }
+</script>
 </html>

@@ -18,6 +18,10 @@
                 } else if ('MozWebSocket' in window) {
                     socket = new MozWebSocket(host)
                 }
+
+                if (option.binaryType === "arraybuffer") {
+                    socket.binaryType = option.binaryType;
+                }
                 return socket
             },
             init = function(client, option) {
@@ -38,18 +42,18 @@
                 return
             }
             socket.onopen = function() {
+                client.online = true;
+
                 var onopen = option.onopen,
                     type = types[option.type];
-                console.log('WebSocket已连接.');
-                console.log("%c类型：" + type, "color:rgb(228, 186, 20)");
+                console.log("WebSocket已连接.%c类型：" + type, "color:rgb(228, 186, 20)");
                 onopen && onopen()
             };
             socket.onclose = function() {
                 var onclose = option.onclose,
                     type = types[option.type];
                 client.online = false;
-                console.error('WebSocket已断开.');
-                console.error("%c类型：" + type, "color:rgb(228, 186, 20)");
+                console.log("WebSocket已断开.%c类型：" + type, "color:rgb(228, 186, 20)");
                 onclose && onclose();
                 if (!client.isUserClose && option.autoReconnect) {
                     client.initialize()
@@ -79,6 +83,8 @@
                     }
                 } else if (message.data instanceof Blob) {
                     option.wsonblob && option.wsonblob(message)
+                } else if (message.data instanceof ArrayBuffer) {
+                    option.onWsBuffer && option.onWsBuffer(message.data);
                 }
             };
             isReady = true;
@@ -91,6 +97,9 @@
         this.sendString = function(message) {
             return isReady && this.socket.send(message)
         };
+        this.send = function(message) {
+            return isReady && this.socket.send(message)
+        };
         this.sendBlob = function(blob) {
             blob = blob.appendAtFirst(this.option.userName);
             var result = isReady && this.socket.send(blob);
@@ -98,16 +107,18 @@
             return result;
         };
         this.close = function() {
-            this.isReady = false;
+            isReady = false;
             this.online = false;
             this.isUserClose = true;
-            this.socket.close();
-            this.socket = null;
-            return true
+            if (this.socket) {
+                this.socket.close();
+                this.socket = null;
+            }
+            return true;
         };
         this.isMe = function(name) {
             return this.option.userName == name
-        }
-        init(this, option)
+        };
+        init(this, option);
     }
 })(window);

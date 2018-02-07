@@ -14,10 +14,9 @@
 	$(".pageTop .func a.voice").on("click", function() {
 		if ($(this).attr("class").indexOf("check") > -1) {
 			$(this).removeClass("check");
-			audioClient.close()
+            audioClient.close();
 		} else {
 			if (!audioClient.online) {
-				Console.microphone = new MicroPhone(), Console.mySound = new audio("#mySound");
 				audioClient.initialize("uid=" + audioClient.option.userName)
 			}
 			$(this).addClass("check")
@@ -78,9 +77,8 @@ $.fn.ctrlEnter = function(btns, fn) {
 
 	function performAction(e) {
 		fn.call(thiz, e)
-	};
-	thiz.unbind();
-	thiz.bind("keydown", function(e) {
+	}
+	thiz.off("keydown").on("keydown", function(e) {
 		if (e.keyCode === 13 && e.ctrlKey) {
 			thiz.val(thiz.val() + "\n");
 			scrollToBottom(thiz);
@@ -90,8 +88,8 @@ $.fn.ctrlEnter = function(btns, fn) {
 			e.preventDefault()
 		}
 	});
-	btns.bind("click", performAction)
-}
+	btns.off("click").on("click", performAction)
+};
 function htmlEncode(value) {
 	return $('<div/>').text(value).html()
 }

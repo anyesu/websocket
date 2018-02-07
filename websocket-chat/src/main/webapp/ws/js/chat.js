@@ -6,7 +6,7 @@ var MODE_TEXT = 0,
 		host: "ws://" + window.location.host + "/websocket/chat",
 		type: MODE_TEXT,
 		onopen: function() {
-			$(".mainedit").ctrlEnter("#submit", function(event) {
+			$(".mainedit").ctrlEnter(".submit", function(event) {
 				var message = {
 					type: 3,
 					msg: $(Console.Win).find(".mainedit").val()
@@ -19,7 +19,7 @@ var MODE_TEXT = 0,
 			Console.log('WebSocket已连接.')
 		},
 		onclose: function() {
-			$(".mainedit").ctrlEnter("#submit", function(event) {
+			$(".mainedit").ctrlEnter(".submit", function(event) {
 				Console.log('WebSocket已断开.请刷新页面以重新连接', true)
 			});
 			Console.log('Info: WebSocket已断开.', true)
@@ -27,7 +27,6 @@ var MODE_TEXT = 0,
 		wsonopen: function(msg) {
 			textClient.initUserList(msg.dests);
 			if (textClient.isMe(msg.host)) {
-				textClient.online = true;
 				msg = "您已加入聊天室"
 			} else {
 				msg = msg.host + "加入了聊天室"
@@ -61,7 +60,7 @@ var MODE_TEXT = 0,
 		}
 	});
 textClient.addsrcMsg = function(msg) {
-	var console = Console.Win + " #console",
+	var console = Console.Win + " .console",
 		obj = '<div class="row"><span class="headpic src" title="' + msg.host + '"></span><i class="src"></i><div class="src"><p></p><br><p class="time">' + new Date().toLocaleString() + '</p></div>';
 	obj = $(obj);
 	obj.find("p").eq(0).html(msg.msg);
@@ -69,7 +68,7 @@ textClient.addsrcMsg = function(msg) {
 	scrollToBottom($(console))
 };
 textClient.adddestMsg = function(msg) {
-	var console = Console.Win + " #console",
+	var console = Console.Win + " .console",
 		obj = '<div class="row"><span class="headpic" title="' + msg.host + '"></span><i></i><div class="dest"><p></p><br><p class="time">' + new Date().toLocaleString() + '</p></div>';
 	obj = $(obj);
 	obj.find("p").eq(0).html(msg.msg);
@@ -106,7 +105,6 @@ var videoClient = new WSClient({
 	host: "ws://" + window.location.host + "/websocket/chat/video",
 	type: MODE_VIDEO,
 	onopen: function() {
-		videoClient.online = true;
 		videoClient.onlineNum = 1;
 		Console.myVideo.obj.bind("play", function() {
 			requestAnimationFrame(function() {
@@ -128,7 +126,6 @@ var videoClient = new WSClient({
 	wsonopen: function(msg) {
 		videoClient.onlineNum = msg.dests.length;
 		if (videoClient.isMe(msg.host)) {
-			videoClient.online = true;
 			videoClient.addVideo();
 			msg = "您已加入视频聊天"
 		} else {
@@ -267,124 +264,166 @@ videoClient.sendFrame = function() {
 	}
 };
 var audioClient = new WSClient({
-	host: "ws://" + window.location.host + "/websocket/chat/audio",
-	type: MODE_AUDIO,
-	onopen: function() {
-		audioClient.online = true;
-		audioClient.onlineNum = 1;
-		Console.microphone.start(function() {
-			Console.mySound.src = Console.microphone.source();
-			if (audioClient.onlineNum > 1 && Console.microphone.CurrentData) {
-				//第一种方式 发送Blob数据
-				//audioClient.sendBlob(Console.microphone.CurrentData);
-				
-				//第二种方式 发送string数据
-				var data = Console.microphone.CurrentData;
-				readBlobAsDataURL(data, function(data) {
-					var msg = {
-						type: 3,
-						msg: data.substring("data:audio/wav;base64,".length),
-						host: videoClient.option.userName
-					};
-					msg.msg = window.atob(msg.msg);
-					audioClient.sendString(JSON.stringify(msg))
-				})
-			}
-		});
-		Console.log('语音聊天已连接.')
-	},
-	onclose: function() {
-		audioClient.online = false;
-		audioClient.onlineNum = 0;
-		Console.microphone.stop(Console.mySound.src);
-		Console.log('语音聊天已断开.', true);
-		if (!audioClient.isUserClose) {
-			audioClient.initialize("uid=" + audioClient.option.userName)
-		}
-	},
-	wsonopen: function(msg) {
-		audioClient.onlineNum = msg.dests.length;
-		if (audioClient.isMe(msg.host)) {
-			audioClient.online = true;
-			audioClient.addVoice();
-			msg = "您已加入语音聊天"
-		} else {
-			audioClient.addVoice(msg);
-			msg = msg.host + "加入了语音聊天"
-		}
-		Console.log(msg)
-	},
-	wsonclose: function(msg) {
-		if (audioClient.isMe(msg.host)) {
-			audioClient.online = false;
-			audioClient.removeVoice();
-			audioClient.onlineNum = 0;
-			msg = "您已退出语音聊天"
-		} else {
-			audioClient.removeVoice(msg.host);
-			audioClient.onlineNum = msg.dests.length;
-			msg = msg.host + "退出了语音聊天"
-		}
-		Console.log(msg, true)
-	},
-	wsonmessage: function(msg) {
-		audioClient.playVoice2(msg.host, msg.msg)
-	},
-	wsonblob: function(blob) {
-		var offset = 14;
-		audioClient.playVoice(new Blob([blob.data.slice(0, offset)], {
-			type: "text/plain"
-		}), new Blob([blob.data.slice(offset)], {
-			type: "audio/wav"
-		}))
-	},
-	wsrequirelogin: function(msg) {
-		document.location.href = "http://" + window.location.host + "/login.htm?to_url=" + document.location.href
-	},
-	wssetname: function(msg) {}
+    host: "ws://" + window.location.host + "/websocket/chat/audio",
+    type: MODE_AUDIO,
+    binaryType: "arraybuffer",
+    onopen: function() {
+        audioClient.onlineNum = 1;
+        audioClient.voiceList = [];
+
+        var microPhone = Console.microPhone;
+        audioClient.audioContext = microPhone.context;
+        microPhone.startRecord({
+            channelCount: 1,
+            sampleBits: 8,
+            bufferSize: 16384
+        }, function(inputBuffer) {
+            if (audioClient.onlineNum <= 1) {
+                return;
+            }
+            var channelCount = inputBuffer.numberOfChannels,
+                length = inputBuffer.length,
+                samples = new Float32Array(channelCount * length);
+            for (var i = 0; i < length; i++) {
+                for (var j = 0; j < channelCount; j++) {
+                    samples[i * channelCount + j] = inputBuffer.getChannelData(j)[i];
+                }
+            }
+            // 先编码成wav
+            var wav = new Uint8Array(encodeWAV(samples, microPhone.recorderConfig));
+
+            var userName = audioClient.option.userName;
+            var offset = 0;
+            var message = new Uint8Array(wav.length + 8 + userName.length);
+            for (i = 0; i < userName.length;) {
+                message[i] = userName.charCodeAt(i++);
+            }
+            offset += userName.length;
+
+            var timestamp = Date.now();
+            var first = parseInt(timestamp / 4294967296);
+            var second = timestamp % 4294967296;
+            message[offset++] = (first >>> 24) & 0xFF;
+            message[offset++] = (first >>> 16) & 0xFF;
+            message[offset++] = (first >>> 8) & 0xFF;
+            message[offset++] = (first) & 0xFF;
+            message[offset++] = (second >>> 24) & 0xFF;
+            message[offset++] = (second >>> 16) & 0xFF;
+            message[offset++] = (second >>> 8) & 0xFF;
+            message[offset++] = (second) & 0xFF;
+
+            message.set(wav, offset);
+
+            audioClient.send(message);
+        });
+        Console.log('语音聊天已连接.')
+    },
+    onclose: function() {
+        audioClient.removeVoice();
+        if (!audioClient.isUserClose) {
+            Console.log('语音聊天已断开.', true);
+            audioClient.initialize("uid=" + audioClient.option.userName);
+        } else {
+            Console.log("您已退出语音聊天");
+        }
+    },
+    wsonopen: function(msg) {
+        audioClient.onlineNum = msg.dests.length;
+        if (audioClient.isMe(msg.host)) {
+            msg = "您已加入语音聊天"
+        } else {
+            msg = msg.host + "加入了语音聊天"
+        }
+        Console.log(msg)
+    },
+    wsonclose: function(msg) {
+        if (!audioClient.isMe(msg.host)) {
+            audioClient.removeVoice(msg.host);
+            audioClient.onlineNum = msg.dests.length;
+            Console.log(msg.host + "退出了语音聊天");
+        }
+    },
+    onWsBuffer: function(arraybuffer) {
+        var dataView = new DataView(arraybuffer);
+        var host = "";
+        var hostLen = 16;
+        for (var i = 0; i < hostLen;) {
+            host += String.fromCharCode(dataView.getUint8(i++));
+        }
+        audioClient.playVoice({
+            host: host,
+            timestamp: dataView.getUint32(hostLen) * 4294967296 + dataView.getUint32(hostLen + 4),
+            buffer: arraybuffer.slice(hostLen + 8)
+        });
+    },
+    wsrequirelogin: function(msg) {
+        document.location.href = "http://" + window.location.host + "/login.htm?to_url=" + document.location.href
+    },
+    wssetname: function(msg) {
+    }
 });
-audioClient.addVoice = function(host) {
-	if (host) {
-		$('<audio id="audio" destname="' + host + '">').appendTo("#audiocontent")
-	} else {}
-};
+
 audioClient.removeVoice = function(host) {
-	if (host) {
-		var dest = $('audio[destname="' + host + '"]');
-		dest && dest.remove()
-	} else {
-		audioClient.close()
-	}
+    if (host) {
+        this.voiceList[host] = null;
+    } else {
+        this.onlineNum = 0;
+        var microPhone = Console.microPhone;
+        if (microPhone.isRecording) {
+            microPhone.stopRecord();
+        }
+        this.audioContext = null;
+        this.voiceList = null;
+    }
 };
-audioClient.playVoice = function(host, blob) {
-	readBlobAsDataURL(host, function(host) {
-		host = DataURLtoString(host);
-		var audio = $('audio[destname="' + host + '"]');
-		while (audio.length == 0) {
-			audioClient.addVoice(host);
-			audio = $('audio[destname="' + host + '"]')
-		}
-		audio = audio[0];
-		releaseUrl(audio.src);
-		audio.src = window.URL.createObjectURL(blob);
-		audio.play()
-	})
-};
-audioClient.playVoice2 = function(host, data) {
-	var audio = $('audio[destname="' + host + '"]');
-	while (audio.length == 0) {
-		audioClient.addVoice(host);
-		audio = $('audio[destname="' + host + '"]')
-	}
-	audio = audio[0];
-	audio.src = "data:audio/wav;base64," + window.btoa(data);
-	audio.play()
+
+audioClient.playVoice = function(message) {
+    var host = message.host;
+    var timestamp = message.timestamp;
+    var audioContext = audioClient.audioContext;
+    if (audioContext && audioContext.state === "running") {
+        // 解码
+        audioContext.decodeAudioData(message.buffer, function(buffer) {
+            var bufferSource = audioContext.createBufferSource();
+            bufferSource.buffer = buffer;
+            bufferSource.connect(audioContext.destination);
+
+            var currentTime = audioContext.currentTime;
+            var voice = audioClient.voiceList[host] = audioClient.voiceList[host] || {
+                lastBeginTime: currentTime,
+                lastEndTime: currentTime,
+                lastTimestamp: timestamp,
+                fragments: []
+            };
+
+            var lastBeginTime = voice.lastBeginTime;
+            var lastEndTime = voice.lastEndTime;
+            var lastTimestamp = voice.lastTimestamp;
+            var fragments = voice.fragments;
+
+            var newBeginTime = (timestamp - lastTimestamp) / 1000 + lastBeginTime;
+
+            /*
+            if (newBeginTime < lastEndTime) {
+                while (fragments.length > 0) {
+                    fragments.shift().stop();
+                }
+            }
+            fragments.push(bufferSource);
+            */
+            bufferSource.start(newBeginTime);
+            voice.lastBeginTime = newBeginTime;
+            voice.lastEndTime = newBeginTime + buffer.duration;
+            voice.lastTimestamp = timestamp;
+        });
+    }
 };
 var Console = {
 	Win: ".mwd .mode-text",
 	ChatMode: MODE_TEXT,
 	fullScreen: false,
 	isMin: false,
+    microPhone: new MicroPhone(),
 	setMode: function(mode) {
 		if (Console.ChatMode == mode) {
 			return

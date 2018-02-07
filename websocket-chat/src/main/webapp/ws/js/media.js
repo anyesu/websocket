@@ -183,7 +183,7 @@
                 channelCount: _config.channelCount || 2,
                 // 音量
                 volume: _config.volume || 1,
-                // 缓冲大小 2^n
+                // 缓冲大小 2^n (256 ~ 16384)
                 bufferSize: _config.bufferSize || 1024
             };
         };
@@ -264,8 +264,6 @@
         };
 
         this.stopRecord = function() {
-            this._intervalId && clearInterval(this._intervalId);
-
             this.isRecording = false;
 
             if (this.volume2 != null) {

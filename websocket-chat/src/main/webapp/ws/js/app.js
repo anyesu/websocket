@@ -1,5 +1,4 @@
-﻿$(document.body).ready(function(e) {
-	$(videoClient.canvas.dom).appendTo("body");
+﻿$(document.body).ready(function() {
 	NO_SOURCE.src = "/ws/pic/websocket/canvaspost.png";
 	textClient.initialize();
 	Console.setMode(Console.ChatMode);

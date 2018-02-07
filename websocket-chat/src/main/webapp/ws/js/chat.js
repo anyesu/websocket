@@ -35,7 +35,6 @@ var MODE_TEXT = 0,
 		},
 		wsonclose: function(msg) {
 			if (textClient.isMe(msg.host)) {
-				textClient.online = false;
 				textClient.initUserList(null);
 				msg = "您已退出聊天室"
 			} else {
@@ -102,166 +101,143 @@ textClient.initUserList = function(list) {
 	$(userlist).html(_str.toString())
 };
 var videoClient = new WSClient({
-	host: "ws://" + window.location.host + "/websocket/chat/video",
-	type: MODE_VIDEO,
-	onopen: function() {
-		videoClient.onlineNum = 1;
-		Console.myVideo.obj.bind("play", function() {
-			requestAnimationFrame(function() {
-				videoClient.sendFrame()
-			})
-		});
-		Console.myVideo.canPlay && Console.myVideo.play();
-		Console.log('视频聊天已连接.')
-	},
-	onclose: function() {
-		videoClient.online = false;
-		videoClient.onlineNum = 0;
-		Console.myVideo.obj.unbind();
-		Console.log('视频聊天已断开.', true);
-		if (!videoClient.isUserClose) {
-			videoClient.initialize("uid=" + videoClient.option.userName)
-		}
-	},
-	wsonopen: function(msg) {
-		videoClient.onlineNum = msg.dests.length;
-		if (videoClient.isMe(msg.host)) {
-			videoClient.addVideo();
-			msg = "您已加入视频聊天"
-		} else {
-			videoClient.addVideo(msg.host);
-			msg = msg.host + "加入了视频聊天"
-		}
-		Console.log(msg)
-	},
-	wsonclose: function(msg) {
-		if (videoClient.isMe(msg.host)) {
-			videoClient.online = false;
-			videoClient.removeVideo();
-			videoClient.onlineNum = 0;
-			msg = "您已退出视频聊天"
-		} else {
-			videoClient.removeVideo(msg.host);
-			videoClient.onlineNum = msg.dests.length;
-			msg = msg.host + "退出了视频聊天"
-		}
-		Console.log(msg, true)
-	},
-	wsonmessage: function(msg) {
-		videoClient.renderFrame2(msg.host, msg.msg)
-	},
-	wsonblob: function(msg) {
-		var offset = 14;
-		videoClient.renderFrame(new Blob([msg.data.slice(0, offset)], {
-			type: "text/plain"
-		}), new Blob([msg.data.slice(offset)], {
-			type: "image/png"
-		}))
-	},
-	wsrequirelogin: function(msg) {
-		document.location.href = "http://" + window.location.host + "/login.htm?to_url=" + document.location.href
-	},
-	wssetname: function(msg) {}
+    host: "ws://" + window.location.host + "/websocket/chat/video",
+    type: MODE_VIDEO,
+    binaryType: "arraybuffer",
+    onopen: function() {
+        videoClient.onlineNum = 1;
+        $(Console.myVideo.dom).on("play", function() {
+            requestAnimationFrame(function() {
+                videoClient.sendFrame()
+            })
+        });
+        Console.log('视频聊天已连接.')
+    },
+    onclose: function() {
+        videoClient.onlineNum = 0;
+        $(Console.myVideo.dom).off("play");
+        if (!videoClient.isUserClose) {
+            Console.log('视频聊天已断开.', true);
+            videoClient.initialize("uid=" + videoClient.option.userName)
+        } else {
+            Console.log("您已退出视频聊天");
+        }
+    },
+    wsonopen: function(msg) {
+        videoClient.onlineNum = msg.dests.length;
+        if (videoClient.isMe(msg.host)) {
+            videoClient.addVideo();
+            msg = "您已加入视频聊天"
+        } else {
+            videoClient.addVideo(msg.host);
+            msg = msg.host + "加入了视频聊天"
+        }
+        Console.log(msg)
+    },
+    wsonclose: function(msg) {
+        if (videoClient.isMe(msg.host)) {
+            videoClient.removeVideo();
+            videoClient.onlineNum = 0;
+            msg = "您已退出视频聊天"
+        } else {
+            videoClient.removeVideo(msg.host);
+            videoClient.onlineNum = msg.dests.length;
+            msg = msg.host + "退出了视频聊天"
+        }
+        Console.log(msg, true)
+    },
+    onWsBuffer: function(arraybuffer) {
+        var dataView = new DataView(arraybuffer);
+        var host = "";
+        var hostLen = 16;
+        for (var i = 0; i < hostLen;) {
+            host += String.fromCharCode(dataView.getUint8(i++));
+        }
+        videoClient.renderFrame({
+            host: host,
+            timestamp: readUint64(dataView, hostLen),
+            width: dataView.getUint8(hostLen + 8),
+            height: dataView.getUint8(hostLen + 9),
+            buffer: arraybuffer.slice(hostLen + 10)
+        });
+    },
+    wsrequirelogin: function(msg) {
+        document.location.href = "http://" + window.location.host + "/login.htm?to_url=" + document.location.href
+    },
+    wssetname: function(msg) {
+    }
 });
 videoClient.addVideo = function(host) {
-	if (host) {
-		var console = Console.Win + " #videocontent",
-			obj = $('<canvas width="120" height="90" id="canvas" title="' + host + '" destname="' + host + '">'),
-			canvas = obj[0],
-			context = canvas.getContext("2d");
-		context.drawImage(NO_SOURCE, 0, 0, canvas.width, canvas.height);
-		obj.fadeIn('slow').appendTo(console)
-	} else {
-		Console.myVideo.canPlay && Console.myVideo.play()
-	}
+    if (host) {
+        var console = Console.Win + " #videocontent",
+            obj = $('<canvas width="120" height="90" id="canvas" title="' + host + '" destname="' + host + '">'),
+            canvas = obj[0],
+            context = canvas.getContext("2d");
+        context.drawImage(NO_SOURCE, 0, 0, canvas.width, canvas.height);
+        obj.fadeIn('slow').appendTo(console)
+    } else {
+        Console.myVideo.play()
+    }
 };
 videoClient.removeVideo = function(host) {
-	if (host) {
-		var dest = $('canvas[destname="' + host + '"]');
-		dest && dest.remove()
-	} else {
-		videoClient.close()
-	}
+    if (host) {
+        var dest = $('canvas[destname="' + host + '"]');
+        dest && dest.remove()
+    } else {
+        videoClient.close()
+    }
 };
-videoClient.renderFrame2 = function(host, data) {
-	if (Console.ChatMode != MODE_VIDEO) {
-		return
-	}
-	var canvas = $('canvas[destname="' + host + '"]'),
-		img = new Image();
-	while (canvas.length == 0) {
-		videoClient.addVideo(host);
-		canvas = $('canvas[destname="' + host + '"]')
-	}
-	img.onload = function() {
-		releaseUrl(img.src);
-		var _canvas = canvas[0],
-			context = _canvas.getContext("2d");
-		context.drawImage(img, 0, 0, _canvas.width, _canvas.height);
-		img = null
-	};
-	img.src = "data:image/png;base64," + window.btoa(data)
+
+videoClient.renderFrame = function(message) {
+    if (Console.ChatMode !== MODE_VIDEO) {
+        return;
+    }
+    var host = message.host;
+    var canvas = $('canvas[destname="' + host + '"]');
+    while (canvas.length === 0) {
+        videoClient.addVideo(host);
+        canvas = $('canvas[destname="' + host + '"]')
+    }
+    var _canvas = canvas[0],
+        ctx = _canvas.getContext("2d");
+    var imageData = new ImageData(new Uint8ClampedArray(message.buffer), message.width, message.height);
+    ctx.putImageData(imageData, 0, 0);
 };
-videoClient.renderFrame = function(_host, blob) {
-	if (Console.ChatMode != MODE_VIDEO) {
-		return
-	}
-	readBlobAsDataURL(_host, function(host) {
-		_host = null;
-		host = DataURLtoString(host);
-		var canvas = $('canvas[destname="' + host + '"]'),
-			url = URL.createObjectURL(blob),
-			img = new Image();
-		while (canvas.length == 0) {
-			videoClient.addVideo(host);
-			canvas = $('canvas[destname="' + host + '"]')
-		}
-		img.onload = function() {
-			releaseUrl(url);
-			var _canvas = canvas[0],
-				context = _canvas.getContext("2d");
-			context.drawImage(img, 0, 0, _canvas.width, _canvas.height);
-			img = null;
-			blob = null
-		};
-		img.src = url
-	})
-};
-videoClient.sendCanvas = function() {
-	if (videoClient.online) {
-		videoClient.onlineNum > 1 && videoClient.sendBlob(Console.myVideo.CurrentBlob(100, 100));
-		setTimeout(videoClient.sendCanvas, 300)
-	}
-};
-videoClient.sendType = 2;
-videoClient.canvas = new myCanvas(160, 90);
+
 videoClient.sendFrame = function() {
-	if (this.online) {
-		var video = Console.myVideo.dom;
-		if (!video.paused && !video.ended) {
-			if (this.onlineNum > 1) {
-				var canvas = videoClient.canvas.dom,
-					ctx = canvas.getContext("2d");
-				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-				if (this.sendType == 1) {
-					this.sendBlob(dataURLtoBlob(canvas.toDataURL("image/png")))
-				} else {
-					msg = {
-						type: 3,
-						msg: canvas.toDataURL("image/png").substring("data:image/png;base64,".length),
-						host: videoClient.option.userName
-					};
-					msg.msg = window.atob(msg.msg);
-					this.sendString(JSON.stringify(msg))
-				}
-			}
-		}
-		setTimeout(function() {
-			requestAnimationFrame(function() {
-				videoClient.sendFrame()
-			})
-		}, 100)
-	}
+    if (this.online) {
+        var myVideo = Console.myVideo;
+        var video = myVideo.dom;
+        if (!video.paused && !video.ended) {
+            if (this.onlineNum > 1) {
+                var imageData = myVideo.CurrentFrameData(160, 90);
+                var rawData = imageData.data;
+                var userName = this.option.userName;
+                var offset = 0;
+                var message = new Uint8Array(rawData.length + 8 + 2 + userName.length);
+
+                for (var i = 0; i < userName.length;) {
+                    message[i] = userName.charCodeAt(i++);
+                }
+                offset += userName.length;
+
+                var timestamp = Date.now();
+                writeUint64(message, timestamp, offset);
+                offset += 8;
+
+                message[offset++] = imageData.width;
+                message[offset++] = imageData.height;
+                message.set(rawData, offset);
+
+                this.send(message);
+            }
+        }
+        setTimeout(function() {
+            requestAnimationFrame(function() {
+                videoClient.sendFrame()
+            })
+        }, 100)
+    }
 };
 var audioClient = new WSClient({
     host: "ws://" + window.location.host + "/websocket/chat/audio",
@@ -301,18 +277,8 @@ var audioClient = new WSClient({
             offset += userName.length;
 
             var timestamp = Date.now();
-            var first = parseInt(timestamp / 4294967296);
-            var second = timestamp % 4294967296;
-            message[offset++] = (first >>> 24) & 0xFF;
-            message[offset++] = (first >>> 16) & 0xFF;
-            message[offset++] = (first >>> 8) & 0xFF;
-            message[offset++] = (first) & 0xFF;
-            message[offset++] = (second >>> 24) & 0xFF;
-            message[offset++] = (second >>> 16) & 0xFF;
-            message[offset++] = (second >>> 8) & 0xFF;
-            message[offset++] = (second) & 0xFF;
-
-            message.set(wav, offset);
+            writeUint64(message, timestamp, offset);
+            message.set(wav, offset + 8);
 
             audioClient.send(message);
         });
@@ -352,7 +318,7 @@ var audioClient = new WSClient({
         }
         audioClient.playVoice({
             host: host,
-            timestamp: dataView.getUint32(hostLen) * 4294967296 + dataView.getUint32(hostLen + 4),
+            timestamp: readUint64(dataView, hostLen),
             buffer: arraybuffer.slice(hostLen + 8)
         });
     },
@@ -504,4 +470,22 @@ var Console = {
 
 function releaseUrl(url) {
 	url && window.URL && window.URL.revokeObjectURL && window.URL.revokeObjectURL(url)
+}
+
+function readUint64(dataView, offset) {
+    return dataView.getUint32(offset) * 4294967296 + dataView.getUint32(offset + 4);
+}
+
+function writeUint64(array, _uint64, offset) {
+    var first = parseInt(_uint64 / 4294967296);
+    var second = _uint64 % 4294967296;
+    array[offset++] = (first >>> 24) & 0xFF;
+    array[offset++] = (first >>> 16) & 0xFF;
+    array[offset++] = (first >>> 8) & 0xFF;
+    array[offset++] = (first) & 0xFF;
+
+    array[offset++] = (second >>> 24) & 0xFF;
+    array[offset++] = (second >>> 16) & 0xFF;
+    array[offset++] = (second >>> 8) & 0xFF;
+    array[offset] = (second) & 0xFF;
 }
